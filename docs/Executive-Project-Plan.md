@@ -1,6 +1,6 @@
 # DukaanAssist — Executive Project Plan
 
-**Version:** 1.3  
+**Version:** 1.4  
 **Audience:** Team, stakeholders, pilot partners  
 **ICP (Phase 1):** **Travel agencies** only — WhatsApp Business, text-only.  
 **Assumption:** Each pilot uses a **WhatsApp Business phone number** as its public customer contact.
@@ -42,6 +42,8 @@ Help **travel agencies** never miss a customer on **WhatsApp** by answering in *
 | **Daily / periodic summary** for owner | Heavy fine-tuning / custom ML |
 
 **Tone requirement:** Answers read like a **helpful agency staff member**, not a template robot (prompt design + short paragraphs + locale-appropriate phrasing).
+
+**Engineering (not a Phase 1 product commitment):** The backend treats **WhatsApp as one messaging adapter**. The conversation core (FAQ, LLM, leads, escalation) is **channel-agnostic** so **Telegram**, **SMS**, or other text ingress can be added later without a rewrite. Phase 1 still **ships WhatsApp only** for customers. See `Architecture.md` §3.
 
 ---
 
@@ -88,7 +90,7 @@ Details: `Tech-Stack.md`, `Architecture.md`.
 | **0 — Discovery** | 1–2 weeks | Design partners; **travel-agency** FAQ templates; success metrics. |
 | **1 — MVP** | 2–3 weeks | Webhook → LLM → DB → reply; leads; owner notifications; daily summary; minimal admin. |
 | **2 — Pilot harden** | 4–6 weeks | Reliability, retries, language quality, billing hooks (if productized), abuse handling. |
-| **3 — Scale features** | As needed | Richer FAQ import (e.g. packages CSV), simple fields for dates/pax, staff seats. |
+| **3 — Scale features** | As needed | Richer FAQ import (e.g. packages CSV), simple fields for dates/pax, staff seats; **optional second customer channel** (e.g. Telegram or SMS) on the same orchestrator when ICP demand appears. |
 | **4 — Voice (optional)** | After text PMF | Narrow callback flows — only if WhatsApp text proves value. |
 
 ---
@@ -104,7 +106,8 @@ Details: `Tech-Stack.md`, `Architecture.md`.
 
 ## 9. Dependencies / decisions
 
-- **WhatsApp:** **Business number** per agency, linked to **Cloud API** / WABA.  
+- **WhatsApp:** **Business number** per agency, linked to **Cloud API** / WABA (Phase 1 customer channel).  
+- **Messaging architecture:** **Adapter + normalized events** so additional channels are incremental work, not a fork (`Architecture.md` §3).  
 - **Owner takeover:** **Web operator inbox** + escalation notifications; refine after pilots.  
 - **Source of truth:** Static FAQ and policies **supplied and maintained by the agency** (or onboarding assist).
 

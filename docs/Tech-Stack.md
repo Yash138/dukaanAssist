@@ -1,6 +1,6 @@
 # DukaanAssist — Tech Stack (MVP)
 
-**Version:** 1.3  
+**Version:** 1.4  
 **ICP:** **Travel agencies** (Phase 1).  
 **Constraints:** Text-only Phase 1, **minimal cost**, **fast to ship**, **official WhatsApp** (Cloud API).  
 **Assumption:** Each agency uses a **WhatsApp Business phone number** connected to the platform (not a personal-only consumer line).
@@ -14,7 +14,7 @@
 | Runtime / API | **Python 3.11+** + **FastAPI** | Async-friendly webhooks, quick iteration, good LLM ecosystem. |
 | Database | **PostgreSQL** | Single DB for config, messages, leads; familiar ops; optional `pgvector` later. |
 | LLM | **One primary API** (e.g. OpenAI-compatible or direct) | Use **JSON / structured output** for intent + `needs_human`; cheapest model for classification if split. |
-| WhatsApp | **Meta Cloud API** (direct) | **Lower cost** than aggregator markup for MVP; “minimal compliance” = standard Meta business + number onboarding. |
+| Customer messaging | **Meta Cloud API** (direct) + **adapter boundary** | Phase 1 = WhatsApp only; orchestrator and DB stay **channel-agnostic** so **Telegram**, **SMS**, or other text channels can add adapters later without rewriting the LLM core. |
 | Hosting | **Single small VPS** (e.g. 1 vCPU, 1–2 GB RAM) or smallest always-on PaaS | Matches “one VM” mental model; scale after validation. |
 | Admin / onboarding | **Streamlit** or **single-page HTML + FastAPI templates** | Fastest for FAQ edit + business profile; no heavy frontend early. |
 | Reverse proxy / TLS | **Caddy** or **nginx** + Let’s Encrypt | Free TLS for webhook URL. |
@@ -32,6 +32,8 @@
 - **Outbound:** HTTPS calls to Graph API `v21.0` (or current) `/PHONE_NUMBER_ID/messages`.
 - **Templates:** Required for **marketing** and some **utility** outside 24h window; design 2–3 owner-alert templates early.
 - **Dev:** Meta test numbers / sandbox flows before production number migration.
+
+**Isolation:** Inbound webhooks and outbound sends for WhatsApp live in a **thin adapter**; the app consumes **normalized** events (tenant, `channel`, thread/sender ids, text) and replies through an **outbound router**. Do not embed Graph API payload shapes in orchestrator or LLM code. Future channels (e.g. **Telegram Bot API**, **SMS** via Twilio or similar) are additional adapters + config keys per tenant. See `Architecture.md` §3.
 
 ---
 
